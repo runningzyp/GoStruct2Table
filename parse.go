@@ -15,22 +15,15 @@ const (
 	VALUE  = 70
 )
 
-var Lock = struct {
-	title int
-}{
-	title: 0,
+func FormatHead() {
+	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
+	fmt.Printf("|%s|%s|%s|\n", "ROOT"+strings.Repeat(" ", PARENT-len("ROOT")), "KEY"+strings.Repeat(" ", KEY-len("KEY")), "VALUE"+strings.Repeat(" ", VALUE-len("VALUE")))
+}
+func FormatSideLine() {
+	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 }
 
-func FormatHead() {
-	if Lock.title != 0 {
-		return
-	}
-	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
-	fmt.Printf("|%s|%s|%s|\n", "CONFIG"+strings.Repeat(" ", PARENT-len("CONFIG")), "KEY"+strings.Repeat(" ", KEY-len("KEY")), "VALUE"+strings.Repeat(" ", VALUE-len("VALUE")))
-	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
-	Lock.title = 1
-}
-func FormatLine(Parent string, isTail bool, Key, Value string) {
+func FormatLine(Parent string, Key, Value string) {
 	if len(Parent) > PARENT {
 		Parent = Parent[:PARENT]
 	}
@@ -41,31 +34,24 @@ func FormatLine(Parent string, isTail bool, Key, Value string) {
 		Value = Value[:VALUE]
 	}
 	fmt.Printf("|%s|%s|%s|\n", Parent+strings.Repeat(" ", PARENT-len(Parent)), Key+strings.Repeat(" ", KEY-len(Key)), Value+strings.Repeat(" ", VALUE-len(Value)))
-	if isTail {
-		fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
-	} else {
-		fmt.Printf("+%s+%s+%s+\n", strings.Repeat(" ", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
-	}
 }
 
 func FormatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth int) {
 	defer func() {
 		if deepth == 0 {
-			FormatLine("", true, "<default: null>", "KEYS: ")
+			FormatSideLine()
 		}
 	}()
-	FormatHead()
-	useDefault := []string{}
-	var par string
-	var hasPar bool
-	isTail := false
+	if deepth == 0 {
+		FormatHead()
+	}
+
+	FormatSideLine()
 	for i := 0; i < t.NumField(); i++ {
-
-		if t.Field(i).Type.Kind() == reflect.Struct && deepth < 1 {
+		if t.Field(i).Type.Kind() == reflect.Struct && deepth == 0 {
 			FormatStructTable(t.Field(i).Type, v.Field(i), t.Field(i).Name, 1)
-			continue
+			break
 		}
-
 		var key, value string
 		key = t.Field(i).Name
 
@@ -83,24 +69,12 @@ func FormatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth in
 		}
 		re := regexp.MustCompile(`\r|\n|\t|[\r\n\v\f\x{0085}\x{2028}\x{2029}]`)
 		value = re.ReplaceAllString(value, "")
-		if i == t.NumField()/2 {
-			par = Parent
-		}
-		if value == "" {
-			useDefault = append(useDefault, key)
-		}
 		if value != "" {
-			FormatLine(par, isTail, key, value)
-			if par != "" {
-				hasPar = true
-				par = ""
+			if i == (t.NumField()-1)/2 {
+				FormatLine(Parent, key, value)
+			} else {
+				FormatLine("", key, value)
 			}
 		}
-	}
-	if !hasPar {
-		par = Parent
-	}
-	if deepth != 0 {
-		FormatLine(par, true, "<default: null>", "KEYS: "+strings.Join(useDefault, ","))
 	}
 }

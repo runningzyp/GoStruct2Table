@@ -8,18 +8,21 @@ var p = struct {
 	Age     int
 	Address string
 }{
-	Name:    "test",
+	Name:    "xiangcai",
 	Age:     18,
-	Address: "test",
+	Address: "shanghai",
 }
 ```
 
-| CONFIG | KEY             | VALUE |
-| ----- | --------------- | ----- |
-|        | Name            | test  |
-| ROOT   | Age             | 18    |
-|        | Address         | test  |
-|        | <default: null> | KEYS: |
+```text
++----------+--------------------+---------------------------+
+|ROOT      |KEY                 |VALUE                      |
++----------+--------------------+---------------------------+
+|          |Name                |xiangcai                   |
+|          |Age                 |18                         |
+|          |Address             |shanghai                   |
++----------+--------------------+---------------------------+
+```
 
 ```go
 type Nested struct {
@@ -31,9 +34,21 @@ var p = struct {
 	Address string
 	Nested  Nested
 }{
-	Name:    "test",
+	Name:    "xiangcai",
 	Age:     18,
-	Address: "test",
+	Address: "shanghai",
 	Nested:  Nested{Core: 1},
 }
+```
+
+```text
++----------+--------------------+---------------------------+
+|ROOT      |KEY                 |VALUE                      |
++----------+--------------------+---------------------------+
+|          |Name                |xiangcai                   |
+|          |Age                 |18                         |
+|          |Address             |shanghai                   |
++----------+--------------------+---------------------------+
+|Nested    |Core                |1                          |
++----------+--------------------+---------------------------+
 ```
