@@ -2,6 +2,6 @@ package parser
 
 import "reflect"
 
-func Parase(root interface{}) {
+func Parse(root interface{}) {
 	FormatStructTable(reflect.TypeOf(root), reflect.ValueOf(root), "", 0)
 }

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestParase(t *testing.T) {
+func TestParse(t *testing.T) {
 	var test = struct {
 		Name    string
 		Age     int
@@ -16,11 +16,11 @@ func TestParase(t *testing.T) {
 		Address: "shanghai",
 		Country: "china",
 	}
-	Parase(test)
+	Parse(test)
 
 }
 
-func TestParaseNested(t *testing.T) {
+func TestParseNested(t *testing.T) {
 	type Nested struct {
 		Height int
 		Weight int
@@ -36,10 +36,10 @@ func TestParaseNested(t *testing.T) {
 		Address: "test",
 		Nested:  Nested{Height: 170, Weight: 60},
 	}
-	Parase(n)
+	Parse(n)
 }
 
-func TestParaseNestedAnym(t *testing.T) {
+func TestParseNestedAnym(t *testing.T) {
 	type test struct {
 		Height int
 		Weight int
@@ -56,5 +56,5 @@ func TestParaseNestedAnym(t *testing.T) {
 		Address: "test",
 		test:    test{Height: 170, Weight: 60},
 	}
-	Parase(n)
+	Parse(n)
 }

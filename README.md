@@ -2,7 +2,19 @@
 
 format your struct like a table.
 
+## Installing
+
+```
+$ go get -u -v github.com/runningzyp/GoStruct2Table
+```
+
+## Simple Example
+
+
+
 ```go
+import parser "github.com/runningzyp/GoStruct2Table"
+
 var p = struct {
 	Name    string
 	Age     int
@@ -12,6 +24,9 @@ var p = struct {
 	Age:     18,
 	Address: "shanghai",
 }
+
+parser.Parse(p)
+
 ```
 
 ```text
@@ -23,6 +38,7 @@ var p = struct {
 |          |Address             |shanghai                   |
 +----------+--------------------+---------------------------+
 ```
+Nested:
 
 ```go
 type Nested struct {
