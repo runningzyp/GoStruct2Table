@@ -16,7 +16,9 @@ func TestParse(t *testing.T) {
 		Address: "shanghai",
 		Country: "china",
 	}
-	Parse(test)
+	if err := Parse(test); err != nil {
+		t.Error(err)
+	}
 
 }
 
@@ -36,7 +38,10 @@ func TestParseNested(t *testing.T) {
 		Address: "test",
 		Nested:  Nested{Height: 170, Weight: 60},
 	}
-	Parse(n)
+	if err := Parse(n); err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestParseNestedAnym(t *testing.T) {
@@ -57,4 +62,11 @@ func TestParseNestedAnym(t *testing.T) {
 		test:    test{Height: 170, Weight: 60},
 	}
 	Parse(n)
+}
+
+func TestParseNotStruct(t *testing.T) {
+	var e = map[string]string{"1": "1", "2": "2"}
+	if err := Parse(e); err == nil {
+		t.Error()
+	}
 }
