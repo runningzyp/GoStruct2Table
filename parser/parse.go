@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -15,15 +16,15 @@ const (
 	VALUE  = 70
 )
 
-func FormatHead() {
+func formatHead() {
 	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 	fmt.Printf("|%s|%s|%s|\n", "ROOT"+strings.Repeat(" ", PARENT-len("ROOT")), "KEY"+strings.Repeat(" ", KEY-len("KEY")), "VALUE"+strings.Repeat(" ", VALUE-len("VALUE")))
 }
-func FormatSideLine() {
+func formatSideLine() {
 	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 }
 
-func FormatLine(Parent string, Key, Value string) {
+func formatLine(Parent string, Key, Value string) {
 	if len(Parent) > PARENT {
 		Parent = Parent[:PARENT]
 	}
@@ -38,20 +39,20 @@ func FormatLine(Parent string, Key, Value string) {
 
 // Print the struct to os.stdout
 // TODO: support output type
-func FormatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth int) {
+func formatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth int) {
 	defer func() {
 		if deepth == 0 {
-			FormatSideLine()
+			formatSideLine()
 		}
 	}()
 	if deepth == 0 {
-		FormatHead()
+		formatHead()
 	}
 
-	FormatSideLine()
+	formatSideLine()
 	for i := 0; i < t.NumField(); i++ {
 		if t.Field(i).Type.Kind() == reflect.Struct && deepth == 0 {
-			FormatStructTable(t.Field(i).Type, v.Field(i), t.Field(i).Name, 1)
+			formatStructTable(t.Field(i).Type, v.Field(i), t.Field(i).Name, 1)
 			break
 		}
 		var key, value string
@@ -73,10 +74,21 @@ func FormatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth in
 		value = re.ReplaceAllString(value, "")
 		if value != "" {
 			if i == (t.NumField()-1)/2 {
-				FormatLine(Parent, key, value)
+				formatLine(Parent, key, value)
 			} else {
-				FormatLine("", key, value)
+				formatLine("", key, value)
 			}
 		}
 	}
+}
+
+// Table show be a struct.
+// if you want to use a struct pointer, you shold get the value first
+// *T > T
+func Parse(root interface{}) error {
+	if reflect.TypeOf(root).Kind() != reflect.Struct {
+		return errors.New("root is not struct")
+	}
+	formatStructTable(reflect.TypeOf(root), reflect.ValueOf(root), "", 0)
+	return nil
 }

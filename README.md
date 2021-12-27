@@ -13,7 +13,7 @@ $ go get -u -v github.com/runningzyp/GoStruct2Table
 
 
 ```go
-import parser "github.com/runningzyp/GoStruct2Table"
+import "github.com/runningzyp/GoStruct2Table/parser"
 
 var p = struct {
 	Name    string

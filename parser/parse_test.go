@@ -1,4 +1,4 @@
-package table
+package parser
 
 import (
 	"testing"
