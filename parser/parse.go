@@ -36,6 +36,8 @@ func FormatLine(Parent string, Key, Value string) {
 	fmt.Printf("|%s|%s|%s|\n", Parent+strings.Repeat(" ", PARENT-len(Parent)), Key+strings.Repeat(" ", KEY-len(Key)), Value+strings.Repeat(" ", VALUE-len(Value)))
 }
 
+// Print the struct to os.stdout
+// TODO: support output type
 func FormatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth int) {
 	defer func() {
 		if deepth == 0 {
