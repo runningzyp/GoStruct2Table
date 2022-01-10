@@ -53,7 +53,7 @@ func formatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth in
 	for i := 0; i < t.NumField(); i++ {
 		if t.Field(i).Type.Kind() == reflect.Struct && deepth == 0 {
 			formatStructTable(t.Field(i).Type, v.Field(i), t.Field(i).Name, 1)
-			break
+			continue
 		}
 		var key, value string
 		key = t.Field(i).Name
