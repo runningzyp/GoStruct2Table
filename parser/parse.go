@@ -16,6 +16,13 @@ const (
 	VALUE  = 70
 )
 
+type Row struct {
+	key    string
+	value  string
+	childs []*Row
+	lock   bool
+}
+
 func formatHead() {
 	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 	fmt.Printf("|%s|%s|%s|\n", "ROOT"+strings.Repeat(" ", PARENT-len("ROOT")), "KEY"+strings.Repeat(" ", KEY-len("KEY")), "VALUE"+strings.Repeat(" ", VALUE-len("VALUE")))
@@ -39,56 +46,47 @@ func formatLine(Parent string, Key, Value string) {
 
 // Print the struct to os.stdout
 // TODO: support output type
-func formatStructTable(t reflect.Type, v reflect.Value, Parent string, deepth int) {
-	defer func() {
-		if deepth == 0 {
-			formatSideLine()
-		}
-	}()
-	if deepth == 0 {
-		formatHead()
-	}
-
-	formatSideLine()
+func parseStructTable(t reflect.Type, v reflect.Value, Parent *Row) {
 	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Type.Kind() == reflect.Struct && deepth == 0 {
-			formatStructTable(t.Field(i).Type, v.Field(i), t.Field(i).Name, 1)
+		var child = Row{lock: true}
+		child.key = t.Field(i).Name
+		Parent.childs = append(Parent.childs, &child)
+		if t.Field(i).Type.Kind() == reflect.Struct && !Parent.lock {
+			parseStructTable(t.Field(i).Type, v.Field(i), &child)
 			continue
 		}
-		var key, value string
-		key = t.Field(i).Name
 
 		switch v.Field(i).Interface().(type) {
 		case string:
-			value, _ = v.Field(i).Interface().(string)
+			child.value, _ = v.Field(i).Interface().(string)
 		case int:
 			ret, _ := v.Field(i).Interface().(int)
-			value = strconv.Itoa(ret)
+			child.value = strconv.Itoa(ret)
 		case bool:
 			ret, _ := v.Field(i).Interface().(bool)
-			value = strconv.FormatBool(ret)
+			child.value = strconv.FormatBool(ret)
 		default:
-			value = fmt.Sprintf("%v", v.Field(i).Interface())
+			child.value = fmt.Sprintf("%v", v.Field(i).Interface())
 		}
 		re := regexp.MustCompile(`\r|\n|\t|[\r\n\v\f\x{0085}\x{2028}\x{2029}]`)
-		value = re.ReplaceAllString(value, "")
-		if value != "" {
-			if i == (t.NumField()-1)/2 {
-				formatLine(Parent, key, value)
-			} else {
-				formatLine("", key, value)
-			}
-		}
+		child.value = re.ReplaceAllString(child.value, "")
+
 	}
+}
+
+func formatStructTable() {
+
 }
 
 // Table show be a struct.
 // if you want to use a struct pointer, you shold get the value first
 // *T > T
-func Parse(root interface{}) error {
-	if reflect.TypeOf(root).Kind() != reflect.Struct {
+func Parse(ins interface{}) error {
+	if reflect.TypeOf(ins).Kind() != reflect.Struct {
 		return errors.New("root is not struct")
 	}
-	formatStructTable(reflect.TypeOf(root), reflect.ValueOf(root), "", 0)
+	var root = Row{key: "ROOT",value:  lock: true}
+	parseStructTable(reflect.TypeOf(ins), reflect.ValueOf(ins), &root)
+	formatStructTable()
 	return nil
 }
