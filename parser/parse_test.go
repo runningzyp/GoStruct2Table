@@ -27,16 +27,23 @@ func TestParseNested(t *testing.T) {
 		Height int
 		Weight int
 	}
+	type Nested1 struct {
+		Height int
+		Weight int
+	}
 	var n = struct {
 		Name    string
 		Age     int
 		Address string
 		Nested  Nested
+		Nested1 Nested1
+		b 	 bool
 	}{
 		Name:    "test",
 		Age:     18,
 		Address: "test",
 		Nested:  Nested{Height: 170, Weight: 60},
+		Nested1: Nested1{Height: 170, Weight: 60},
 	}
 	if err := Parse(n); err != nil {
 		t.Error(err)

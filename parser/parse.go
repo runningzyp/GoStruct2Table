@@ -21,23 +21,25 @@ type Row struct {
 	value  string
 	parent *Row
 	childs []*Row
+	parentKey string // parent.childs[middle] == this
 	lock   bool
 }
 
 func (r *Row) format() {
-	if r.childs == nil {
+	if r.childs != nil {
 		formatSideLine()
 	}
 	if r.childs != nil {
-		for i := range r.childs {
-			r.childs[i].format()
+		r.childs[len(r.childs)/2].parentKey = r.key
+		for _, v := range r.childs {
+			v.format()
 		}
 	} else {
-		formatLine(r.parent.key, r.key, r.value)
+		formatLine(r.parentKey, r.key, r.value)
 	}
-	if r.childs == nil {
-		formatSideLine()
-	}
+	// if r.childs != nil {
+	// 	formatSideLine()
+	// }
 
 }
 
@@ -66,7 +68,7 @@ func formatLine(Parent string, Key, Value string) {
 // TODO: support output type
 func parseStructTable(t reflect.Type, v reflect.Value, Parent *Row) {
 	for i := 0; i < t.NumField(); i++ {
-		var child = Row{lock: true}
+		var child = Row{lock: true, parent: Parent}
 		child.key = t.Field(i).Name
 		Parent.childs = append(Parent.childs, &child)
 		if t.Field(i).Type.Kind() == reflect.Struct && !Parent.lock {
@@ -106,9 +108,8 @@ func Parse(ins interface{}) error {
 	if reflect.TypeOf(ins).Kind() != reflect.Struct {
 		return errors.New("root is not struct")
 	}
-	var root = &Row{lock: true}
+	var root = &Row{}
 	parseStructTable(reflect.TypeOf(ins), reflect.ValueOf(ins), root)
-	fmt.Print(*root)
 	root.format()
 	return nil
 }
