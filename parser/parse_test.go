@@ -32,11 +32,11 @@ func TestParseNested(t *testing.T) {
 		Weight int
 	}
 	var n = struct {
+		Nested1 Nested1
 		Name    string
 		Age     int
 		Address string
 		Nested  Nested
-		Nested1 Nested1
 		b       bool
 	}{
 		Name:    "test",

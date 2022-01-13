@@ -24,33 +24,20 @@ type Row struct {
 	parentKey string // parent.childs[middle] == this
 }
 
-func (r *Row) format() {
-	if r.parent == nil {
-		formatHead()
-	}
-	if r.childs != nil {
-		formatSideLine()
-		r.childs[len(r.childs)/2].parentKey = r.key
-		for _, v := range r.childs {
-			v.format()
-		}
-	} else {
-		formatLine(r.parentKey, r.key, r.value)
-	}
-	if r.parent == nil {
-		formatSideLine()
-	}
-}
-
 func formatHead() {
 	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 	fmt.Printf("|%s|%s|%s|\n", "ROOT"+strings.Repeat(" ", PARENT-len("ROOT")), "KEY"+strings.Repeat(" ", KEY-len("KEY")), "VALUE"+strings.Repeat(" ", VALUE-len("VALUE")))
-}
-func formatSideLine() {
 	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
 }
 
-func formatLine(Parent string, Key, Value string) {
+func formatBottom() {
+	fmt.Printf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
+}
+
+func formatLine() string {
+	return fmt.Sprintf("+%s+%s+%s+\n", strings.Repeat("-", PARENT), strings.Repeat("-", KEY), strings.Repeat("-", VALUE))
+}
+func formatContent(Parent string, Key, Value string) string {
 	if len(Parent) > PARENT {
 		Parent = Parent[:PARENT]
 	}
@@ -60,7 +47,7 @@ func formatLine(Parent string, Key, Value string) {
 	if len(Value) > VALUE {
 		Value = Value[:VALUE]
 	}
-	fmt.Printf("|%s|%s|%s|\n", Parent+strings.Repeat(" ", PARENT-len(Parent)), Key+strings.Repeat(" ", KEY-len(Key)), Value+strings.Repeat(" ", VALUE-len(Value)))
+	return fmt.Sprintf("|%s|%s|%s|", Parent+strings.Repeat(" ", PARENT-len(Parent)), Key+strings.Repeat(" ", KEY-len(Key)), Value+strings.Repeat(" ", VALUE-len(Value)))
 }
 
 // Print the struct to os.stdout
@@ -96,6 +83,32 @@ func parseStructTable(t reflect.Type, v reflect.Value, Parent *Row) {
 	}
 }
 
+func formatStructTable(root *Row) {
+	var outer string
+	var inner string
+	var line = formatLine()
+	var lineFeed = "\n"
+	for _, row := range root.childs {
+		if row.childs == nil {
+			inner += formatContent(row.parentKey, row.key, row.value) + lineFeed
+		} else {
+			if inner != "" {
+				outer += inner + line
+			}
+			inner = ""
+			row.childs[len(row.childs)/2].parentKey = row.key
+			for _, child := range row.childs {
+				inner += formatContent(child.parentKey, child.key, child.value) + lineFeed
+			}
+			outer += inner + line
+			inner = ""
+		}
+	}
+	formatHead()
+	fmt.Printf(outer)
+
+}
+
 // Table show be a struct.
 // if you want to use a struct pointer, you shold get the value first
 // *T > T
@@ -105,6 +118,6 @@ func Parse(ins interface{}) error {
 	}
 	var root = &Row{}
 	parseStructTable(reflect.TypeOf(ins), reflect.ValueOf(ins), root)
-	root.format()
+	formatStructTable(root)
 	return nil
 }
