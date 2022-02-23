@@ -105,8 +105,10 @@ func formatStructTable(root *Row) {
 		}
 	}
 	formatHead()
-	fmt.Printf(outer)
-
+	if outer != "" {
+		fmt.Printf(outer)
+	}
+	fmt.Print(inner)
 }
 
 // Table show be a struct.
